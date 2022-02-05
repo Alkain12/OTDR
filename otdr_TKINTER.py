@@ -8,11 +8,11 @@ import os
 import re
 from openpyxl import Workbook
 import tkinter
-import sys
+# import sys
 
 root = tkinter.Tk()
 root.title("Pliki Sor do XLSX")
-root.geometry('480x480+100+100')
+root.geometry('650x380+100+100')
 
 pliksor = re.compile(r'.sor')
 fala = re.compile(r'1310')
@@ -41,7 +41,6 @@ def miejsce_button():
     def f():
         miejsce_butt: str = tkinter.filedialog.askdirectory()
         miejsce.insert(-1, miejsce_butt)
-
     return f()
 
 
@@ -49,24 +48,20 @@ def pobranie():
     def f():
         miejsce2 = miejsce.get()
         plik2 = plik.get()
+        nazwa_czlon_2_licz = nazwa_czlon_2.get()
+        nazwa2_czlon_2_licz = nazwa2_czlon_2.get()
+        opis_czlon_2_licz = opis_czlon_2.get()
+        opis2_czlon_2_licz = opis2_czlon_2.get()
         # print(miejsce2)
         # print(plik2)
-        liczenie(miejsce2, plik2)
+        liczenie(miejsce2, plik2, nazwa_czlon_2_licz,nazwa2_czlon_2_licz, opis_czlon_2_licz, opis2_czlon_2_licz)
 
     return f()
 
 
-def liczenie(baz_fold, nazwapliku):
+def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d, opis_z_olt):
     licz = 0
     licz2 = 2
-
-    # okno_licz = tkinter.Toplevel(root)
-    # okno_licz.geometry('200x200')
-    # okno_licz.title("Postęp")
-    #
-    # pasek = Progressbar(okno_licz, length=100, style='black.Horizontal.TProgressbar')
-    # pasek.pack(expand=True)
-    # pasek['value'] = licz
 
     # licztdqm = 0
     sub_folders = []
@@ -77,19 +72,20 @@ def liczenie(baz_fold, nazwapliku):
 
         for plik in os.listdir(sub_folders1):
             if pliksor.search(plik):
+
                 # print(f'nazwa pliku {plik}')
                 if fala.search(plik):
-                    new = pyOTDR.sorparse(str(sub_folders1) + '\\' + str(plik))
-                    new2 = new[1]
+                    open_sor = pyOTDR.sorparse(str(sub_folders1) + '\\' + str(plik))
+                    new2 = open_sor[1]
                     nazwa2 = plik.split(sep='_')
                     # print(nazwa2)
                     # print(new2["GenParams"])
                     nazwa3 = nazwa2[1]
-                    if nazwa3 == "DROP":
-                        nazwa = new2["GenParams"]["location A"] + f' D' + nazwa2[2]
-                    if nazwa3 == "OLT":
-                        nazwa = new2["GenParams"]["location A"] + f' SP' + nazwa2[2]
-                    if nazwa3 != "DROP" and nazwa3 != "OLT":
+                    if nazwa3 == second_czlon_drop:
+                        nazwa = new2["GenParams"]["location A"] + " " + opis_z_d + nazwa2[2]
+                    if nazwa3 == second_czlon_olt:
+                        nazwa = new2["GenParams"]["location A"] + " " + opis_z_olt + nazwa2[2]
+                    if nazwa3 != second_czlon_drop and nazwa3 != second_czlon_olt:
                         nazwa = new2["GenParams"]["location B"] + f' P' + nazwa2[2]
                     # print(nazwa2)
                     db = new2["KeyEvents"]['Summary']["total loss"]
@@ -102,16 +98,16 @@ def liczenie(baz_fold, nazwapliku):
                         ws.cell(row=licz2, column=6).value = new2["KeyEvents"]['event 1']["refl loss"]
                     licz2 -= 1
                 else:
-                    new = pyOTDR.sorparse(str(sub_folders1) + '\\' + str(plik))
-                    new2 = new[1]
+                    open_sor = pyOTDR.sorparse(str(sub_folders1) + '\\' + str(plik))
+                    new2 = open_sor[1]
                     nazwa2 = plik.split(sep='_')
                     # print(nazwa2)
                     nazwa3 = nazwa2[1]
-                    if nazwa3 == "DROP":
-                        nazwa = new2["GenParams"]["location A"] + f' D' + nazwa2[2]
-                    if nazwa3 == "OLT":
-                        nazwa = new2["GenParams"]["location A"] + f' SP' + nazwa2[2]
-                    if nazwa3 != "DROP" and nazwa3 != "OLT":
+                    if nazwa3 == second_czlon_drop:
+                        nazwa = new2["GenParams"]["location A"] + " " + opis_z_d + nazwa2[2]
+                    if nazwa3 == second_czlon_olt:
+                        nazwa = new2["GenParams"]["location A"] + " " + opis_z_olt + nazwa2[2]
+                    if nazwa3 != second_czlon_drop and nazwa3 != second_czlon_olt:
                         nazwa = new2["GenParams"]["location B"] + f' P' + nazwa2[2]
                     # print(plik)
                     db = new2["KeyEvents"]['Summary']["total loss"]
@@ -130,8 +126,9 @@ def liczenie(baz_fold, nazwapliku):
     wb.save(f"{baz_fold}\{nazwapliku}.xlsx")
     # print(licz)
     new_wind = tkinter.Toplevel(root)
+    new_wind.geometry('200x200')
     new_wind.title("Koniec pracy")
-    tkinter.Label(new_wind, text="Skończone").pack()
+    tkinter.Label(new_wind, text=f"Skończone przetworzone {licz} plików").pack()
     # sys.exit()
 
 
@@ -141,18 +138,41 @@ miejsce = tkinter.Entry(root)
 # b1 = tkinter.Button(root, text='Wskaż miejsce ', command=miejsce_button).grid(row=0, column=2,pady=2,padx=2)
 miejsce.grid(row=0, column=1)
 
-tkinter.Label(root, text='Nazwa pliku xlsx').grid(row=1, column=0, padx=2, pady=2)
-plik = tkinter.Entry(root)
-plik.grid(row=1, column=1)
+tkinter.Label(root, text='2 człon nazwy pliku').grid(row=1, column=0, padx=2, pady=2)
+nazwa_czlon_2 = tkinter.Entry(root)
+nazwa_czlon_2.grid(row=1, column=1)
+nazwa_czlon_2.insert(-1, "DROP")
 
-b2 = tkinter.Button(root, text='Twórz XLSX, plik ', command=pobranie).grid(row=2)
+tkinter.Label(root, text='opis excel').grid(row=1, column=2, padx=2, pady=2)
+opis_czlon_2 = tkinter.Entry(root)
+opis_czlon_2.grid(row=1, column=3)
+opis_czlon_2.insert(-1, "D")
+
+tkinter.Label(root, text='2 człon nazwy pliku \"SP\"').grid(row=2, column=0, padx=2, pady=2)
+nazwa2_czlon_2 = tkinter.Entry(root)
+nazwa2_czlon_2.grid(row=2, column=1)
+nazwa2_czlon_2.insert(-1, "OLT")
+
+tkinter.Label(root, text='opis excel').grid(row=2, column=2, padx=2, pady=2)
+opis2_czlon_2 = tkinter.Entry(root)
+opis2_czlon_2.grid(row=2, column=3)
+opis2_czlon_2.insert(-1, "SP")
+
+tkinter.Label(root, text='Nazwa pliku xlsx').grid(row=3, column=0, padx=2, pady=2)
+plik = tkinter.Entry(root)
+plik.grid(row=3, column=1)
+
+b2 = tkinter.Button(root, text='Twórz XLSX, plik ', command=pobranie).grid(row=4)
+
+
+
 
 style = ttk.Style()
 style.theme_use('default')
 style.configure("black.Horizontal.TProgressbar", background='brown')
 
-pasek = Progressbar(root, length=00, style='black.Horizontal.TProgressbar')
-pasek.grid(columnspan=3)
+pasek = Progressbar(root, length=500,  style='black.Horizontal.TProgressbar')
+pasek.grid(row=5, column=0, columnspan=4, padx=2, pady=2)
 # pasek['value'] = licz
 
 root.mainloop()
