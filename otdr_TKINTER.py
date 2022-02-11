@@ -60,9 +60,22 @@ def pobranie():
 
 
 def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d, opis_z_olt):
-    licz = 0
+    licz_all = 0
     licz2 = 2
 
+    sub_folders = []
+    for dir, sub_dirs, files in os.walk(baz_fold):
+        sub_folders.extend(sub_dirs)
+        sub_folders1 = str(f"{dir}")
+        # print(f'foldery {sub_folders1}')
+
+        for plik in os.listdir(sub_folders1):
+            if pliksor.search(plik):
+                licz_all += 1
+                print(licz_all)
+    licz_all_10_pr : int = licz_all // 10
+    print(licz_all_10_pr)
+    licz = 0
     # licztdqm = 0
     sub_folders = []
     for dir, sub_dirs, files in os.walk(baz_fold):
@@ -120,8 +133,7 @@ def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d
                         ws.cell(row=licz2, column=13).value = new2["KeyEvents"]['event 1']["refl loss"]
                 licz += 1
                 licz2 += 1
-            # pasek['value'] = licz
-            print(licz)
+
 
     wb.save(f"{baz_fold}\{nazwapliku}.xlsx")
     # print(licz)
@@ -173,6 +185,6 @@ style.configure("black.Horizontal.TProgressbar", background='brown')
 
 pasek = Progressbar(root, length=500,  style='black.Horizontal.TProgressbar')
 pasek.grid(row=5, column=0, columnspan=4, padx=2, pady=2)
-# pasek['value'] = licz
+# pasek['value'] = 0
 
 root.mainloop()
