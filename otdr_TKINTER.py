@@ -52,14 +52,16 @@ def pobranie():
         nazwa2_czlon_2_licz = nazwa2_czlon_2.get()
         opis_czlon_2_licz = opis_czlon_2.get()
         opis2_czlon_2_licz = opis2_czlon_2.get()
+        opis2_czlon_2c_licz = opis2_czlon_2c.get()
+        opis2_refelktancja_licz = float(opis2_refelktancja.get())
         # print(miejsce2)
         # print(plik2)
-        liczenie(miejsce2, plik2, nazwa_czlon_2_licz,nazwa2_czlon_2_licz, opis_czlon_2_licz, opis2_czlon_2_licz)
+        liczenie(miejsce2, plik2, nazwa_czlon_2_licz,nazwa2_czlon_2_licz, opis_czlon_2_licz, opis2_czlon_2_licz, opis2_czlon_2c_licz, opis2_refelktancja_licz)
 
     return f()
 
 
-def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d, opis_z_olt):
+def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d, opis_z_olt, opis_z_pozostale, opis_z_reflektancja):
     licz_all = 0
     licz2 = 2
 
@@ -72,9 +74,9 @@ def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d
         for plik in os.listdir(sub_folders1):
             if pliksor.search(plik):
                 licz_all += 1
-                print(licz_all)
+                # print(licz_all)
     licz_all_10_pr : int = licz_all // 10
-    print(licz_all_10_pr)
+    # print(licz_all_10_pr)
     licz = 0
     # licztdqm = 0
     sub_folders = []
@@ -91,7 +93,7 @@ def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d
                     open_sor = pyOTDR.sorparse(str(sub_folders1) + '\\' + str(plik))
                     new2 = open_sor[1]
                     nazwa2 = plik.split(sep='_')
-                    # print(nazwa2)
+                    reflektancja = float(new2["KeyEvents"]['event 1']["refl loss"])
                     # print(new2["GenParams"])
                     nazwa3 = nazwa2[1]
                     if nazwa3 == second_czlon_drop:
@@ -99,7 +101,7 @@ def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d
                     if nazwa3 == second_czlon_olt:
                         nazwa = new2["GenParams"]["location A"] + " " + opis_z_olt + nazwa2[2]
                     if nazwa3 != second_czlon_drop and nazwa3 != second_czlon_olt:
-                        nazwa = new2["GenParams"]["location B"] + f' P' + nazwa2[2]
+                        nazwa = new2["GenParams"]["location B"] + " " + opis_z_pozostale + nazwa2[2]
                     # print(nazwa2)
                     db = new2["KeyEvents"]['Summary']["total loss"]
                     lenght = new2["KeyEvents"]['Summary']["ORL finish"]
@@ -108,12 +110,17 @@ def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d
                     ws.cell(row=licz2, column=2).value = db
                     ws.cell(row=licz2, column=3).value = lenght
                     if new2["KeyEvents"]['event 1']["refl loss"] != "0.000":
-                        ws.cell(row=licz2, column=6).value = new2["KeyEvents"]['event 1']["refl loss"]
+                        if reflektancja < opis_z_reflektancja:
+                            ws.cell(row=licz2, column=6).value = ""
+                        else:
+                            #print(reflektancja," =>" ,opis_z_reflektancja)
+                            ws.cell(row=licz2, column=6).value = new2["KeyEvents"]['event 1']["refl loss"]
                     licz2 -= 1
                 else:
                     open_sor = pyOTDR.sorparse(str(sub_folders1) + '\\' + str(plik))
                     new2 = open_sor[1]
                     nazwa2 = plik.split(sep='_')
+                    reflektancja = float(new2["KeyEvents"]['event 1']["refl loss"])
                     # print(nazwa2)
                     nazwa3 = nazwa2[1]
                     if nazwa3 == second_czlon_drop:
@@ -130,7 +137,11 @@ def liczenie(baz_fold, nazwapliku, second_czlon_drop, second_czlon_olt, opis_z_d
                     ws.cell(row=licz2, column=9).value = db
                     ws.cell(row=licz2, column=10).value = lenght
                     if new2["KeyEvents"]['event 1']["refl loss"] != "0.000":
-                        ws.cell(row=licz2, column=13).value = new2["KeyEvents"]['event 1']["refl loss"]
+                        if reflektancja < opis_z_reflektancja:
+                            ws.cell(row=licz2, column=13).value = ""
+                        else:
+                            # print(reflektancja," =>" ,opis_z_reflektancja)
+                            ws.cell(row=licz2, column=13).value = new2["KeyEvents"]['event 1']["refl loss"]
                 licz += 1
                 licz2 += 1
 
@@ -160,7 +171,7 @@ opis_czlon_2 = tkinter.Entry(root)
 opis_czlon_2.grid(row=1, column=3)
 opis_czlon_2.insert(-1, "D")
 
-tkinter.Label(root, text='2 człon nazwy pliku \"SP\"').grid(row=2, column=0, padx=2, pady=2)
+tkinter.Label(root, text='2 człon nazwy pliku').grid(row=2, column=0, padx=2, pady=2)
 nazwa2_czlon_2 = tkinter.Entry(root)
 nazwa2_czlon_2.grid(row=2, column=1)
 nazwa2_czlon_2.insert(-1, "OLT")
@@ -170,13 +181,28 @@ opis2_czlon_2 = tkinter.Entry(root)
 opis2_czlon_2.grid(row=2, column=3)
 opis2_czlon_2.insert(-1, "SP")
 
-tkinter.Label(root, text='Nazwa pliku xlsx').grid(row=3, column=0, padx=2, pady=2)
+tkinter.Label(root, text='Pozostałe pliki').grid(row=3, column=0, padx=2, pady=2)
+nazwa2_czlon_2c = tkinter.Entry(root)
+#nazwa2_czlon_2.grid(row=3, column=1)
+#nazwa2_czlon_2.insert(-1, "OLT")
+
+tkinter.Label(root, text='opis excel').grid(row=3, column=2, padx=2, pady=2)
+opis2_czlon_2c = tkinter.Entry(root)
+opis2_czlon_2c.grid(row=3, column=3)
+opis2_czlon_2c.insert(-1, "P")
+
+tkinter.Label(root, text='reflektancja').grid(row=4, column=2, padx=2, pady=2)
+opis2_refelktancja = tkinter.Entry(root)
+opis2_refelktancja.grid(row=4, column=3)
+opis2_refelktancja.insert(-1, "-72")
+
+
+
+tkinter.Label(root, text='Nazwa pliku xlsx').grid(row=6, column=0, padx=2, pady=2)
 plik = tkinter.Entry(root)
-plik.grid(row=3, column=1)
+plik.grid(row=6, column=1)
 
-b2 = tkinter.Button(root, text='Twórz XLSX, plik ', command=pobranie).grid(row=4)
-
-
+b2 = tkinter.Button(root, text='Twórz XLSX, plik ', command=pobranie).grid(row=6)
 
 
 style = ttk.Style()
@@ -184,7 +210,7 @@ style.theme_use('default')
 style.configure("black.Horizontal.TProgressbar", background='brown')
 
 pasek = Progressbar(root, length=500,  style='black.Horizontal.TProgressbar')
-pasek.grid(row=5, column=0, columnspan=4, padx=2, pady=2)
+pasek.grid(row=7, column=0, columnspan=4, padx=2, pady=2)
 # pasek['value'] = 0
 
 root.mainloop()
